@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync, readFileSync, realpathSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   DEFAULT_REQUESTS,
@@ -54,7 +57,17 @@ test("an explicit Otito executable overrides bundled and global resolution", () 
 });
 
 test("direct local invocation falls back to the current Git repository", () => {
-  assert.equal(resolveRepoRoot({}), process.cwd());
+  const originalCwd = process.cwd();
+  const repo = mkdtempSync(join(tmpdir(), "otito-herdr-plugin-"));
+  execFileSync("git", ["init", "--quiet"], { cwd: repo });
+
+  try {
+    process.chdir(repo);
+    assert.equal(resolveRepoRoot({}), realpathSync(repo));
+  } finally {
+    process.chdir(originalCwd);
+    rmSync(repo, { recursive: true, force: true });
+  }
 });
 
 test("staged gate arguments bind request, base, validation, and staged tree", () => {
