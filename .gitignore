@@ -1,0 +1,4 @@
+node_modules/
+.otito/
+.DS_Store
+*.log
