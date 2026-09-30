@@ -27,7 +27,7 @@ export function parseInvocationContext(
 }
 
 export function requestFromContext(action, context, override) {
-  const explicit = String(override ?? process.env.OTITO_REQUEST ?? "").trim();
+  const explicit = String(override ?? process.env.SOLUMBE_REQUEST ?? "").trim();
   if (explicit) return explicit;
   const selection = String(context.selected_text ?? "").trim();
   return selection || DEFAULT_REQUESTS[action] || DEFAULT_REQUESTS.review;
@@ -43,7 +43,7 @@ function git(args, cwd) {
 
 export function resolveRepoRoot(context = parseInvocationContext()) {
   const candidates = [
-    process.env.OTITO_REPO,
+    process.env.SOLUMBE_REPO,
     context.focused_pane_cwd,
     context.worktree?.checkout_path,
     context.workspace_cwd,
@@ -84,15 +84,15 @@ export function resolveBase(repo) {
   return undefined;
 }
 
-export function resolveOtitoCommand(env = process.env) {
-  const configured = String(env.OTITO_BIN ?? "").trim();
+export function resolveSolumbeCommand(env = process.env) {
+  const configured = String(env.SOLUMBE_BIN ?? "").trim();
   if (configured) return { command: configured, prefix: [] };
 
   const bundledCli = resolve(
     pluginRoot,
     "node_modules",
     "@bashbop",
-    "otito",
+    "solumbe",
     "src",
     "cli.js",
   );
@@ -100,18 +100,18 @@ export function resolveOtitoCommand(env = process.env) {
     return { command: process.execPath, prefix: [bundledCli] };
   }
 
-  const installed = spawnSync("otito", ["--version"], {
+  const installed = spawnSync("solumbe", ["--version"], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
   });
-  if (installed.status === 0) return { command: "otito", prefix: [] };
+  if (installed.status === 0) return { command: "solumbe", prefix: [] };
 
   throw new Error(
-    "Otito is unavailable. Reinstall this plugin so its locked dependency is built, or set OTITO_BIN to an Otito executable.",
+    "Solumbe is unavailable. Reinstall this plugin so its locked dependency is built, or set SOLUMBE_BIN to an Solumbe executable.",
   );
 }
 
-export function buildOtitoArgs(action, { repo, request, base }) {
+export function buildSolumbeArgs(action, { repo, request, base }) {
   if (action === "doctor") return ["doctor"];
   if (action === "context") {
     return ["context", request, "--path", repo];
@@ -138,11 +138,11 @@ export function buildOtitoArgs(action, { repo, request, base }) {
     if (base) args.push("--base", base);
     return args;
   }
-  throw new Error(`Unknown Otito Herdr action: ${action}`);
+  throw new Error(`Unknown Solumbe Herdr action: ${action}`);
 }
 
-export function runOtito(args, options = {}) {
-  const executable = resolveOtitoCommand();
+export function runSolumbe(args, options = {}) {
+  const executable = resolveSolumbeCommand();
   const capture = options.capture ?? false;
   return spawnSync(executable.command, [...executable.prefix, ...args], {
     cwd: options.cwd,

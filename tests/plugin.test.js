@@ -7,11 +7,11 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   DEFAULT_REQUESTS,
-  buildOtitoArgs,
+  buildSolumbeArgs,
   parseInvocationContext,
   requestFromContext,
   resolveRepoRoot,
-  resolveOtitoCommand,
+  resolveSolumbeCommand,
 } from "../runtime.mjs";
 import { formatTrustSummary } from "../trust-pane.mjs";
 
@@ -19,9 +19,9 @@ const manifestPath = fileURLToPath(
   new URL("../herdr-plugin.toml", import.meta.url),
 );
 
-test("manifest exposes the bounded Otito trust workflow", () => {
+test("manifest exposes the bounded Solumbe trust workflow", () => {
   const manifest = readFileSync(manifestPath, "utf8");
-  assert.match(manifest, /id = "bashbop\.otito"/);
+  assert.match(manifest, /id = "bashbop\.solumbe"/);
   assert.match(manifest, /min_herdr_version = "0\.8\.2"/);
   assert.match(manifest, /command = \["npm", "ci", "--ignore-scripts"\]/);
   for (const action of [
@@ -49,9 +49,9 @@ test("invocation context is defensive and selected text becomes the request", ()
   assert.equal(requestFromContext("review", {}), DEFAULT_REQUESTS.review);
 });
 
-test("an explicit Otito executable overrides bundled and global resolution", () => {
-  assert.deepEqual(resolveOtitoCommand({ OTITO_BIN: "/opt/otito" }), {
-    command: "/opt/otito",
+test("an explicit Solumbe executable overrides bundled and global resolution", () => {
+  assert.deepEqual(resolveSolumbeCommand({ SOLUMBE_BIN: "/opt/solumbe" }), {
+    command: "/opt/solumbe",
     prefix: [],
   });
 });
@@ -71,7 +71,7 @@ test("direct local invocation falls back to the current Git repository", () => {
 });
 
 test("staged gate arguments bind request, base, validation, and staged tree", () => {
-  const args = buildOtitoArgs("gate-staged", {
+  const args = buildSolumbeArgs("gate-staged", {
     repo: "/tmp/repo",
     request: "ship the plugin",
     base: "origin/main",
