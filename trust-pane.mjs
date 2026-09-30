@@ -4,11 +4,11 @@ import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { pathToFileURL } from "node:url";
 import {
-  buildOtitoArgs,
+  buildSolumbeArgs,
   parseInvocationContext,
   resolveBase,
   resolveRepoRoot,
-  runOtito,
+  runSolumbe,
 } from "./runtime.mjs";
 
 function clear() {
@@ -25,8 +25,8 @@ export function formatTrustSummary(report, repo, base) {
   const checks = report.pass?.checks ?? [];
   const attention = checks.filter((check) => check.status !== "PASS");
   const lines = [
-    "OTITO TRUST STATUS",
-    "Models generate the change. Otito proves whether it is safe to merge.",
+    "SOLUMBE TRUST STATUS",
+    "Models generate the change. Solumbe proves whether it is safe to merge.",
     "",
     `Repository  ${repo}`,
     `Base        ${base ?? "not detected"}`,
@@ -54,18 +54,18 @@ export function formatTrustSummary(report, repo, base) {
 function readReport(repo, base, request) {
   const args = ["review", repo, "--request", request, "--json"];
   if (base) args.push("--base", base);
-  const result = runOtito(args, { cwd: repo, capture: true });
+  const result = runSolumbe(args, { cwd: repo, capture: true });
   if (result.error) throw result.error;
   let report;
   try {
     report = JSON.parse(result.stdout);
   } catch {
     throw new Error(
-      result.stderr.trim() || "Otito returned unreadable review data.",
+      result.stderr.trim() || "Solumbe returned unreadable review data.",
     );
   }
   if (report.ok === false) {
-    throw new Error(report.error || "Otito could not generate a review.");
+    throw new Error(report.error || "Solumbe could not generate a review.");
   }
   return report;
 }
@@ -76,9 +76,9 @@ async function runInteractiveCommand(rl, action, repo, base) {
     request = (await rl.question("Change request: ")).trim();
     if (!request) return;
   }
-  const args = buildOtitoArgs(action, { repo, request, base });
+  const args = buildSolumbeArgs(action, { repo, request, base });
   stdout.write("\n");
-  const result = runOtito(args, { cwd: repo });
+  const result = runSolumbe(args, { cwd: repo });
   if (result.error) throw result.error;
   await rl.question("\nPress Enter to return to trust status...");
 }
@@ -98,7 +98,7 @@ export async function main() {
         stdout.write(`${formatTrustSummary(report, repo, base)}\n`);
       } catch (error) {
         stdout.write(
-          `OTITO TRUST STATUS\n\n${error.message ?? String(error)}\n`,
+          `SOLUMBE TRUST STATUS\n\n${error.message ?? String(error)}\n`,
         );
       }
 
@@ -116,8 +116,8 @@ export async function main() {
           const nextRequest = (await rl.question("Change request: ")).trim();
           if (nextRequest) {
             request = nextRequest;
-            const result = runOtito(
-              buildOtitoArgs("impact", { repo, request, base }),
+            const result = runSolumbe(
+              buildSolumbeArgs("impact", { repo, request, base }),
               { cwd: repo },
             );
             if (result.error) throw result.error;
@@ -126,7 +126,7 @@ export async function main() {
         } else if (choice === "g") {
           await runInteractiveCommand(rl, "gate-staged", repo, base);
         } else if (choice === "d") {
-          const result = runOtito(["doctor"], { cwd: repo });
+          const result = runSolumbe(["doctor"], { cwd: repo });
           if (result.error) throw result.error;
           await rl.question("\nPress Enter to return to trust status...");
         }
@@ -147,7 +147,7 @@ const isMain = process.argv[1]
 if (isMain) {
   main().catch((error) => {
     process.stderr.write(
-      `Otito Herdr plugin: ${error.message ?? String(error)}\n`,
+      `Solumbe Herdr plugin: ${error.message ?? String(error)}\n`,
     );
     process.exitCode = 1;
   });

@@ -2,20 +2,20 @@
   "name": "@bashbop/otito-herdr-plugin",
   "version": "0.1.0",
   "private": true,
-  "description": "Run Otito context and deterministic merge evidence inside Herdr agent workspaces.",
+  "description": "Run Solumbe context and deterministic merge evidence inside Herdr agent workspaces.",
   "type": "module",
   "scripts": {
     "check": "node --check action.mjs && node --check runtime.mjs && node --check trust-pane.mjs",
     "test": "node --test tests/*.test.js",
     "audit": "npm audit --omit=dev",
-    "smoke": "(git rev-parse --is-inside-work-tree >/dev/null 2>&1 || git init --quiet) && OTITO_REPO=. OTITO_REQUEST='Inspect this Herdr plugin' node action.mjs context",
+    "smoke": "(git rev-parse --is-inside-work-tree >/dev/null 2>&1 || git init --quiet) && SOLUMBE_REPO=. SOLUMBE_REQUEST='Inspect this Herdr plugin' node action.mjs context",
     "ci": "npm run check && npm test && npm run audit && npm run smoke"
   },
   "engines": {
     "node": ">=18.18"
   },
   "dependencies": {
-    "@bashbop/otito": "1.8.0"
+    "@bashbop/solumbe": "4.0.0"
   },
   "license": "MIT",
   "repository": {
@@ -24,7 +24,7 @@
   },
   "keywords": [
     "herdr-plugin",
-    "otito",
+    "solumbe",
     "ai-agents",
     "code-review",
     "merge-safety",

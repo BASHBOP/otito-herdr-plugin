@@ -2,34 +2,34 @@
 
 import { pathToFileURL } from "node:url";
 import {
-  buildOtitoArgs,
+  buildSolumbeArgs,
   parseInvocationContext,
   requestFromContext,
   resolveBase,
   resolveRepoRoot,
-  runOtito,
+  runSolumbe,
 } from "./runtime.mjs";
 
 export function runAction(action, options = {}) {
   const context = options.context ?? parseInvocationContext();
   if (action === "doctor") {
-    return runOtito(buildOtitoArgs(action, {}));
+    return runSolumbe(buildSolumbeArgs(action, {}));
   }
 
   const repo = options.repo ?? resolveRepoRoot(context);
   const request = requestFromContext(action, context, options.request);
   const base = options.base ?? resolveBase(repo);
   process.stdout.write(
-    `Otito · ${action}\nRepository: ${repo}\nRequest: ${request}\n\n`,
+    `Solumbe · ${action}\nRepository: ${repo}\nRequest: ${request}\n\n`,
   );
-  return runOtito(buildOtitoArgs(action, { repo, request, base }), {
+  return runSolumbe(buildSolumbeArgs(action, { repo, request, base }), {
     cwd: repo,
   });
 }
 
 export function main(argv = process.argv.slice(2)) {
   const action = argv[0];
-  if (!action) throw new Error("Expected an Otito Herdr action name.");
+  if (!action) throw new Error("Expected an Solumbe Herdr action name.");
   const result = runAction(action);
   if (result.error) throw result.error;
   process.exitCode = result.status ?? 1;
@@ -44,7 +44,7 @@ if (isMain) {
     main();
   } catch (error) {
     process.stderr.write(
-      `Otito Herdr plugin: ${error.message ?? String(error)}\n`,
+      `Solumbe Herdr plugin: ${error.message ?? String(error)}\n`,
     );
     process.exitCode = 1;
   }
